@@ -1,0 +1,17 @@
+## [Visual Studio / .NET]
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+## [Data]
+data/history.json
+data/settings.json
+scans/
+
+## [User Specific]
+.vs/
+.idea/
+*.swp
+*.LNK
