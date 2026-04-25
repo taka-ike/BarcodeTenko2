@@ -46,6 +46,7 @@
                         <TextBlock Text="スキャン入力" FontSize="16" FontWeight="Bold" Margin="0,0,16,0" Foreground="{StaticResource TextPrimaryBrush}"/>
                         
                         <TextBox x:Name="ManualInputBox" Style="{StaticResource ModernTextBox}" 
+                                 Text="{Binding ManualInput, UpdateSourceTrigger=PropertyChanged}" 
                                  Tag="バーコードを入力..."
                                  FontSize="20" FontWeight="Bold"
                                  KeyDown="ManualInputBox_KeyDown" Margin="0,0,12,0"/>
