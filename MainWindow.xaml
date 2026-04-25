@@ -6,8 +6,7 @@
         xmlns:local="clr-namespace:Tenko.Native"
         mc:Ignorable="d"
         Title="Tenko Native" Height="600" Width="800"
-        FontFamily="Yu Gothic UI, Meiryo"
-        PreviewKeyDown="Window_PreviewKeyDown">
+        FontFamily="Yu Gothic UI, Meiryo">
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />

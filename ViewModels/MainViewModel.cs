@@ -14,7 +14,6 @@ namespace Tenko.Native.ViewModels
         private readonly HistoryService _historyService;
         private readonly ScanFileService _scanFileService;
         private readonly NotificationService _notificationService;
-        private readonly KeyboardCaptureService _keyboardCaptureService;
 
         private string _manualInput = string.Empty;
         private string _currentLocation = string.Empty;
@@ -30,14 +29,12 @@ namespace Tenko.Native.ViewModels
             SettingsService settingsService,
             HistoryService historyService,
             ScanFileService scanFileService,
-            NotificationService notificationService,
-            KeyboardCaptureService keyboardCaptureService)
+            NotificationService notificationService)
         {
             _settingsService = settingsService;
             _historyService = historyService;
             _scanFileService = scanFileService;
             _notificationService = notificationService;
-            _keyboardCaptureService = keyboardCaptureService;
 
             foreach (var loc in _settingsService.Locations)
             {
@@ -47,7 +44,6 @@ namespace Tenko.Native.ViewModels
             _currentLocation = _settingsService.Location;
             
             _notificationService.OnNotification += (s, e) => ShowNotification(e.Message, e.Type);
-            _keyboardCaptureService.OnScanCompleted += HandleBackgroundScan;
 
             LoadHistory();
             CheckBinFile();
@@ -267,17 +263,6 @@ namespace Tenko.Native.ViewModels
                 _notificationTimer.Stop();
             };
             _notificationTimer.Start();
-        }
-
-        public void OnPreviewKeyDown(string keyText)
-        {
-            // Only process if not focused on manual input? 
-            // gemini.md says: "手動テキストボックス入力 ... 確定時に 5桁または10桁 のみ有効"
-            // "常時キー入力監視（バーコードリーダー想定）"
-            // If focused on textbox, we should probably let textbox handle it.
-            // But barcode reader usually just types and hits Enter.
-            
-            _keyboardCaptureService.ProcessKey(keyText);
         }
     }
 }
