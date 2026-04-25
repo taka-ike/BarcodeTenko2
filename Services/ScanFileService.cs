@@ -85,11 +85,11 @@ namespace Tenko.Native.Services
 
         public void RenameBin(string oldLocation, string newFileName)
         {
-            // Note: newFileName is expected to be just the location-like part or the full ids_...bin?
-            // gemini.md says: "input dialog accepts new name (ids_ and .bin are auto-added)"
+            // Note: newFileName is expected to be just the suffix part.
+            // Requirement: Include the original location in the filename.
             string oldPath = GetFilePath(oldLocation);
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string newPath = Path.Combine(baseDir, "scans", $"ids_{newFileName}.bin");
+            string newPath = Path.Combine(baseDir, "scans", $"ids_{oldLocation}_{newFileName}.bin");
 
             if (File.Exists(oldPath))
             {
@@ -99,12 +99,6 @@ namespace Tenko.Native.Services
                 }
                 File.Move(oldPath, newPath);
             }
-        }
-        
-        public byte[] GetBinContent(string location)
-        {
-            string path = GetFilePath(location);
-            return File.Exists(path) ? File.ReadAllBytes(path) : Array.Empty<byte>();
         }
     }
 }

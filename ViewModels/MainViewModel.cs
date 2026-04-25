@@ -122,11 +122,6 @@ namespace Tenko.Native.ViewModels
             ShowBinWarning = _scanFileService.Exists(CurrentLocation);
         }
 
-        private void HandleBackgroundScan(string barcode)
-        {
-            ProcessScan(barcode);
-        }
-
         private void SubmitManualInput()
         {
             if (string.IsNullOrWhiteSpace(ManualInput)) return;
@@ -230,7 +225,7 @@ namespace Tenko.Native.ViewModels
                 _historyService.SaveHistory(new());
                 
                 ShowBinWarning = false;
-                _notificationService.Success($"既存ファイルを ids_{sanitized}.bin に退避し、履歴をクリアしました。");
+                _notificationService.Success($"既存ファイルを ids_{CurrentLocation}_{sanitized}.bin に退避し、履歴をクリアしました。");
             }
             catch (Exception ex)
             {

@@ -62,10 +62,11 @@
                                  Text="{Binding ManualInput, UpdateSourceTrigger=PropertyChanged}" 
                                  Tag="バーコードを入力..."
                                  FontSize="20" FontWeight="Bold"
-                                 KeyDown="ManualInputBox_KeyDown" Margin="0,0,12,0"/>
+                                 KeyDown="ManualInputBox_KeyDown" 
+                                 Height="45" Margin="0,0,0,0"/>
                         
                         <Button Content="送信" Command="{Binding SubmitCommand}" 
-                                Style="{StaticResource ModernButton}" Height="45" Margin="0,12,0,0"/>
+                                Style="{StaticResource ModernButton}" Height="45" Margin="0,8,0,0"/>
 
                         <Separator Margin="0,24" Background="{StaticResource BorderBrush}"/>
 
@@ -176,7 +177,7 @@
                                TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,24,0" LineHeight="20"/>
                     
                     <TextBlock Text="新しいファイル名" FontSize="12" FontWeight="Bold" Margin="0,0,4,0" Foreground="{StaticResource TextSecondaryBrush}"/>
-                    <TextBox x:Name="RenameTextBox" Style="{StaticResource ModernTextBox}" Margin="0,0,0,32"/>
+                    <TextBox x:Name="RenameTextBox" Style="{StaticResource ModernTextBox}" Height="45" Margin="0,0,0,32"/>
                     
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -184,9 +185,9 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Content="名前を変更して保存" Click="RenameButton_Click" 
-                                Style="{StaticResource ModernButton}" Margin="0,0,8,0"/>
+                                Style="{StaticResource ModernButton}" Height="45" Margin="0,0,8,0"/>
                         <Button Grid.Column="1" Content="そのまま追記する" Click="DismissWarning_Click" 
-                                Style="{StaticResource OutlineButton}" Margin="8,0,0,0"/>
+                                Style="{StaticResource OutlineButton}" Height="45" Margin="8,0,0,0"/>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -202,7 +203,7 @@
                     <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding CurrentLocation, Mode=TwoWay}" 
                               Height="40" Margin="0,0,0,32"/>
                     
-                    <Button Content="設定を閉じる" Click="CloseSettings_Click" Style="{StaticResource ModernButton}" HorizontalAlignment="Stretch"/>
+                    <Button Content="設定を閉じる" Click="CloseSettings_Click" Style="{StaticResource ModernButton}" Height="40" HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </Border>
         </Border>
