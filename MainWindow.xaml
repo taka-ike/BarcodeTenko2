@@ -27,7 +27,20 @@
                 <Button Content="⚙ 設定" DockPanel.Dock="Right" Style="{StaticResource OutlineButton}" Click="SettingsButton_Click"/>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="📍" FontSize="18" Margin="0,0,8,0"/>
-                    <TextBlock Text="{Binding CurrentLocation}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                    <TextBlock FontSize="18" FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{Binding CurrentLocation}"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsLocationSet}" Value="False">
+                                        <Setter Property="Text" Value="スキャン場所を選択してください"/>
+                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -56,7 +69,7 @@
 
                         <Separator Margin="0,24" Background="{StaticResource BorderBrush}"/>
 
-                        <TextBlock Text="統計" FontSize="14" FontWeight="Bold" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text="累計" FontSize="14" FontWeight="Bold" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
                         <Border Background="#EFF6FF" Padding="16" CornerRadius="8" Margin="0,0,0,24">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding History.Count}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
@@ -115,7 +128,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="ID(下5桁)" Binding="{Binding Last5, StringFormat='\{0:D5\}'}" Width="100">
+                            <DataGridTextColumn Header="学籍番号" Binding="{Binding Last5, StringFormat='\{0:D5\}'}" Width="100">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Padding" Value="12,0"/>

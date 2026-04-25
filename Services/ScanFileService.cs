@@ -70,6 +70,19 @@ namespace Tenko.Native.Services
             }
         }
 
+        public void DeleteAllBins()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string scansDir = Path.Combine(baseDir, "scans");
+            if (Directory.Exists(scansDir))
+            {
+                foreach (var file in Directory.GetFiles(scansDir, "ids_*.bin"))
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+
         public void RenameBin(string oldLocation, string newFileName)
         {
             // Note: newFileName is expected to be just the location-like part or the full ids_...bin?

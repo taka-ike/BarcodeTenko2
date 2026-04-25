@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 using Tenko.Native.Models;
 using Tenko.Native.Services;
@@ -70,10 +71,13 @@ namespace Tenko.Native.ViewModels
                 if (SetProperty(ref _currentLocation, value))
                 {
                     _settingsService.Location = value;
+                    OnPropertyChanged(nameof(IsLocationSet));
                     CheckBinFile();
                 }
             }
         }
+
+        public bool IsLocationSet => !string.IsNullOrEmpty(CurrentLocation);
 
         public bool ShowBinWarning
         {
@@ -149,7 +153,7 @@ namespace Tenko.Native.ViewModels
         {
             if (string.IsNullOrEmpty(CurrentLocation))
             {
-                _notificationService.Warning("ロケーションを選択してください。");
+                _notificationService.Warning("スキャン場所を選択してください。");
                 return;
             }
 
@@ -178,17 +182,36 @@ namespace Tenko.Native.ViewModels
         private void DeleteRecord(ScanRecord? record)
         {
             if (record == null) return;
+
+            var result = MessageBox.Show(
+                $"このレコードを削除しますか？\n時刻: {record.FormattedTimestamp}\nバーコード: {record.Barcode}",
+                "レコード削除の確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
             History.Remove(record);
             _historyService.SaveHistory(History.ToList());
             _scanFileService.RemoveLast5(record.Location, record.Last5);
+            _notificationService.Success("レコードを削除しました。");
         }
 
         private void DeleteAll()
         {
+            var result = MessageBox.Show(
+                $"現在の場所「{CurrentLocation}」の履歴とバイナリデータを削除しますか？\n他の場所のデータは削除されません。",
+                "履歴削除の確認",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
+
             History.Clear();
             _historyService.SaveHistory(new());
             _scanFileService.DeleteBin(CurrentLocation);
-            _notificationService.Success("全履歴を削除しました。");
+            CheckBinFile();
+            _notificationService.Success("現在の場所の履歴を削除しました。");
         }
 
         private void RenameBin(string? newName)
@@ -201,8 +224,13 @@ namespace Tenko.Native.ViewModels
             try
             {
                 _scanFileService.RenameBin(CurrentLocation, sanitized);
+                
+                // Clear scan history to start fresh for the current location
+                History.Clear();
+                _historyService.SaveHistory(new());
+                
                 ShowBinWarning = false;
-                _notificationService.Success($"ファイルを ids_{sanitized}.bin に変更しました。");
+                _notificationService.Success($"既存ファイルを ids_{sanitized}.bin に退避し、履歴をクリアしました。");
             }
             catch (Exception ex)
             {
