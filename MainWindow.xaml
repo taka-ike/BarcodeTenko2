@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tenko.Native"
         mc:Ignorable="d"
-        Title="Tenko Native" Height="600" Width="800"
+        Title="BarcodeTenko2" Height="700" Width="900"
+        Background="{StaticResource BackgroundBrush}"
         FontFamily="Yu Gothic UI, Meiryo">
     
     <Window.Resources>
@@ -16,92 +17,178 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#F3F3F3" Padding="10" BorderBrush="#DDD" BorderThickness="0,0,0,1">
+        <!-- Top Navigation Bar -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="20,12" 
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
             <DockPanel>
-                <Button Content="設定" DockPanel.Dock="Right" Click="SettingsButton_Click" Padding="10,5"/>
+                <Button Content="⚙ 設定" DockPanel.Dock="Right" Style="{StaticResource OutlineButton}" Click="SettingsButton_Click"/>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="現在の場所: " FontWeight="Bold"/>
-                    <TextBlock Text="{Binding CurrentLocation}" Margin="5,0,0,0"/>
+                    <TextBlock Text="📍" FontSize="18" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding CurrentLocation}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <Grid Grid.Row="1" Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBox x:Name="ManualInputBox" Text="{Binding ManualInput, UpdateSourceTrigger=PropertyChanged}" 
-                         FontSize="24" Margin="0,0,10,0" 
-                         KeyDown="ManualInputBox_KeyDown"/>
-                <Button Grid.Column="1" Content="送信" Command="{Binding SubmitCommand}" Padding="20,5" FontSize="18"/>
-            </Grid>
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,20,0,0">
-                <TextBlock Text="スキャン件数: " VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding History.Count}" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0,20,0"/>
-                <Button Content="CSV出力" Command="{Binding ExportCsvCommand}" Margin="0,0,10,0" Padding="10,5"/>
-                <Button Content="BIN出力" Command="{Binding ExportBinCommand}" Margin="0,0,10,0" Padding="10,5"/>
-                <Button Content="全履歴削除" Command="{Binding DeleteAllCommand}" Background="#FFE0E0" Padding="10,5"/>
+            <!-- Left Panel: Input & Controls -->
+            <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                <Border Background="{StaticResource SurfaceBrush}" Padding="20" CornerRadius="12" 
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="スキャン入力" FontSize="16" FontWeight="Bold" Margin="0,0,16,0" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        
+                        <TextBox x:Name="ManualInputBox" Style="{StaticResource ModernTextBox}" 
+                                 Tag="バーコードを入力..."
+                                 FontSize="20" FontWeight="Bold"
+                                 KeyDown="ManualInputBox_KeyDown" Margin="0,0,12,0"/>
+                        
+                        <Button Content="送信" Command="{Binding SubmitCommand}" 
+                                Style="{StaticResource ModernButton}" Height="45" Margin="0,12,0,0"/>
+
+                        <Separator Margin="0,24" Background="{StaticResource BorderBrush}"/>
+
+                        <TextBlock Text="統計" FontSize="14" FontWeight="Bold" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Border Background="#EFF6FF" Padding="16" CornerRadius="8" Margin="0,0,0,24">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding History.Count}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                <TextBlock Text=" 件" FontSize="16" VerticalAlignment="Bottom" Margin="4,0,0,6" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="エクスポート" FontSize="14" FontWeight="Bold" Margin="0,0,8,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="CSV" Command="{Binding ExportCsvCommand}" 
+                                    Style="{StaticResource OutlineButton}" Margin="0,0,4,0"/>
+                            <Button Grid.Column="1" Content="BIN" Command="{Binding ExportBinCommand}" 
+                                    Style="{StaticResource OutlineButton}" Margin="4,0,0,0"/>
+                        </Grid>
+
+                        <Button Content="全履歴を削除" Command="{Binding DeleteAllCommand}" 
+                                Style="{StaticResource DangerButton}" Margin="0,32,0,0" Opacity="0.8"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
+
+            <!-- Right Panel: History Table -->
+            <Border Grid.Column="1" Background="{StaticResource SurfaceBrush}" CornerRadius="12" 
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Border Background="#F9FAFB" Padding="20,12" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <TextBlock Text="スキャン履歴" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding History}" AutoGenerateColumns="False" 
+                              IsReadOnly="True" BorderThickness="0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="時刻" Binding="{Binding FormattedTimestamp}" Width="140">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="12,0"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="バーコード" Binding="{Binding Barcode}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="12,0"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="FontFamily" Value="Consolas"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="ID(下5桁)" Binding="{Binding Last5, StringFormat='\{0:D5\}'}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="12,0"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="操作" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="削除" Command="{Binding DataContext.DeleteRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}" Style="{StaticResource OutlineButton}" 
+                                                Padding="8,2" FontSize="11" Margin="4"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
         </Grid>
 
-        <DataGrid Grid.Row="2" ItemsSource="{Binding History}" AutoGenerateColumns="False" 
-                  IsReadOnly="True" Margin="10" GridLinesVisibility="Horizontal" HeadersVisibility="Column">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="時刻" Binding="{Binding FormattedTimestamp}" Width="150"/>
-                <DataGridTextColumn Header="バーコード" Binding="{Binding Barcode}" Width="*"/>
-                <DataGridTextColumn Header="ID下5桁" Binding="{Binding Last5, StringFormat='\{0:D5\}'}" Width="100"/>
-                <DataGridTextColumn Header="場所" Binding="{Binding Location}" Width="150"/>
-                <DataGridTemplateColumn Header="操作" Width="80">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="削除" Command="{Binding DataContext.DeleteRecordCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
-                                    CommandParameter="{Binding}" Margin="2"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <Border Grid.RowSpan="3" VerticalAlignment="Top" Margin="20" Padding="15" CornerRadius="5"
+        <!-- Toast Notifications -->
+        <Border Grid.RowSpan="2" VerticalAlignment="Top" Margin="0,80,0,0" Padding="20,12" CornerRadius="8"
                 Background="{Binding NotificationType, Converter={StaticResource TypeToBrush}}"
                 Visibility="{Binding IsNotificationVisible, Converter={StaticResource BoolToVis}}"
-                Panel.ZIndex="100" HorizontalAlignment="Center">
-            <TextBlock Text="{Binding NotificationMessage}" Foreground="White" FontWeight="Bold"/>
+                Panel.ZIndex="1000" HorizontalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.2"/>
+            </Border.Effect>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="💡" Margin="0,0,8,0"/>
+                <TextBlock Text="{Binding NotificationMessage}" Foreground="White" FontWeight="Bold"/>
+            </StackPanel>
         </Border>
 
-        <Border Grid.RowSpan="3" Background="#80000000" Visibility="{Binding ShowBinWarning, Converter={StaticResource BoolToVis}}" Panel.ZIndex="200">
-            <Border Background="White" Width="400" Height="250" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20" CornerRadius="10">
+        <!-- Modals -->
+        <!-- Bin Warning Modal -->
+        <Border Grid.RowSpan="2" Background="#99000000" Visibility="{Binding ShowBinWarning, Converter={StaticResource BoolToVis}}" Panel.ZIndex="2000">
+            <Border Background="White" Width="450" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="32" CornerRadius="16">
                 <StackPanel>
-                    <TextBlock Text="既存データ警告" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <TextBlock Text="この場所のデータファイル(ids_*.bin)が既に存在します。名前を変更して保存するか、このまま追記しますか？" TextWrapping="Wrap" Margin="0,0,0,20"/>
-                    <TextBox x:Name="RenameTextBox" Margin="0,0,0,10"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="名前変更" Click="RenameButton_Click" Padding="15,5" Margin="0,0,10,0"/>
-                        <Button Content="そのまま続行" Click="DismissWarning_Click" Padding="15,5"/>
-                    </StackPanel>
+                    <TextBlock Text="既存データが見つかりました" FontSize="20" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <TextBlock Text="この場所には既にデータが存在します。新しい名前を付けて保存するか、そのまま現在のファイルに追記してください。" 
+                               TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,24,0" LineHeight="20"/>
+                    
+                    <TextBlock Text="新しいファイル名" FontSize="12" FontWeight="Bold" Margin="0,0,4,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <TextBox x:Name="RenameTextBox" Style="{StaticResource ModernTextBox}" Margin="0,0,0,32"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="名前を変更して保存" Click="RenameButton_Click" 
+                                Style="{StaticResource ModernButton}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="そのまま追記する" Click="DismissWarning_Click" 
+                                Style="{StaticResource OutlineButton}" Margin="8,0,0,0"/>
+                    </Grid>
                 </StackPanel>
             </Border>
         </Border>
 
-        <Border x:Name="SettingsModal" Grid.RowSpan="3" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="300">
-            <Border Background="White" Width="300" Height="200" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20" CornerRadius="10">
+        <!-- Settings Modal -->
+        <Border x:Name="SettingsModal" Grid.RowSpan="2" Background="#99000000" Visibility="Collapsed" Panel.ZIndex="3000">
+            <Border Background="White" Width="350" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="32" CornerRadius="16">
                 <StackPanel>
-                    <TextBlock Text="設定" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <TextBlock Text="場所を選択してください:" Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding CurrentLocation, Mode=TwoWay}" Margin="0,0,0,20"/>
-                    <Button Content="閉じる" Click="CloseSettings_Click" HorizontalAlignment="Right" Padding="15,5"/>
+                    <TextBlock Text="設定" FontSize="20" FontWeight="Bold" Margin="0,0,24,0"/>
+                    
+                    <TextBlock Text="現在の場所を選択" FontSize="12" FontWeight="Bold" Margin="0,0,4,0" Foreground="{StaticResource TextSecondaryBrush}"/>
+                    <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding CurrentLocation, Mode=TwoWay}" 
+                              Height="40" Margin="0,0,0,32"/>
+                    
+                    <Button Content="設定を閉じる" Click="CloseSettings_Click" Style="{StaticResource ModernButton}" HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </Border>
         </Border>
