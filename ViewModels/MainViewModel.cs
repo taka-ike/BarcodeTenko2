@@ -195,7 +195,7 @@ namespace Tenko.Native.ViewModels
         private void DeleteAll()
         {
             var result = MessageBox.Show(
-                $"現在の場所「{CurrentLocation}」の履歴とバイナリデータを削除しますか？\n他の場所のデータは削除されません。",
+                $"現在の「{CurrentLocation}」の履歴とバイナリデータを削除しますか？\n他のデータは削除されません。",
                 "履歴削除の確認",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
@@ -206,7 +206,7 @@ namespace Tenko.Native.ViewModels
             _historyService.SaveHistory(new());
             _scanFileService.DeleteBin(CurrentLocation);
             CheckBinFile();
-            _notificationService.Success("現在の場所の履歴を削除しました。");
+            _notificationService.Success($"現在の「{CurrentLocation}」の履歴を削除しました。");
         }
 
         private void RenameBin(string? newName)
@@ -225,7 +225,7 @@ namespace Tenko.Native.ViewModels
                 _historyService.SaveHistory(new());
                 
                 ShowBinWarning = false;
-                _notificationService.Success($"既存ファイルを ids_{CurrentLocation}_{sanitized}.bin に退避し、履歴をクリアしました。");
+                _notificationService.Success($"既存ファイルを ids_{CurrentLocation}_{sanitized}.bin に退避しました。");
             }
             catch (Exception ex)
             {
@@ -279,7 +279,7 @@ namespace Tenko.Native.ViewModels
             IsNotificationVisible = true;
 
             _notificationTimer?.Stop();
-            _notificationTimer = new System.Timers.Timer(3000);
+            _notificationTimer = new System.Timers.Timer(1200);
             _notificationTimer.Elapsed += (s, e) =>
             {
                 IsNotificationVisible = false;

@@ -3,7 +3,7 @@ bin/
 obj/
 *.user
 *.userosscache
-*.sln.docstates
+*.sln
 
 ## [Data]
 data/history.json
