@@ -70,7 +70,7 @@
                                 KeyDown="ManualInputBox_KeyDown" 
                                 Height="45" Margin="0,0,0,0" VerticalContentAlignment="Center" Padding="12,8"/>
                         
-                        <Button Content="送信" Command="{Binding SubmitCommand}" 
+                        <Button Content="決定" Command="{Binding SubmitCommand}" 
                                 Style="{StaticResource ModernButton}" Height="45" Margin="0,8,0,0"/>
 
                         <Separator Margin="0,24" Background="{StaticResource BorderBrush}"/>
