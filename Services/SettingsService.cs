@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 
@@ -31,6 +32,7 @@ namespace Tenko.Native.Services
             LoadLocations();
         }
 
+        // 現在選択ロケーションを取得/保存する。設定変更時は即時保存する。
         public string Location
         {
             get => _settings.Location;
@@ -41,8 +43,10 @@ namespace Tenko.Native.Services
             }
         }
 
+        // UI で選択可能なロケーション一覧を返す。
         public List<string> Locations => _locations;
 
+        // settings.json を読み込んで設定を復元する。
         public void Load()
         {
             if (File.Exists(_settingsPath))
@@ -52,19 +56,22 @@ namespace Tenko.Native.Services
                     string json = File.ReadAllText(_settingsPath);
                     _settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"[SettingsService] Load failed: {ex.Message}");
                     _settings = new AppSettings();
                 }
             }
         }
 
+        // 現在設定を settings.json へ保存する。
         public void Save()
         {
             string json = JsonSerializer.Serialize(_settings);
             File.WriteAllText(_settingsPath, json);
         }
 
+        // locations.json を読み込み、存在しない場合は既定値を書き出す。
         private void LoadLocations()
         {
             if (File.Exists(_locationsPath))
@@ -74,7 +81,10 @@ namespace Tenko.Native.Services
                     string json = File.ReadAllText(_locationsPath);
                     _locations = JsonSerializer.Deserialize<List<string>>(json) ?? _locations;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SettingsService] LoadLocations failed: {ex.Message}");
+                }
             }
             else
             {

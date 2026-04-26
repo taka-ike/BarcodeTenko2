@@ -129,7 +129,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="学籍番号" Binding="{Binding Last5, StringFormat='\{0:D5\}'}" Width="100">
+                            <DataGridTextColumn Header="学籍番号" Binding="{Binding Last5, StringFormat={}{0:D5}}" Width="100">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Padding" Value="12,0"/>

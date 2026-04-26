@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Tenko.Native.Models;
 using Tenko.Native.Services;
 
@@ -110,6 +111,7 @@ namespace Tenko.Native.ViewModels
         public ICommand ExportBinCommand { get; }
         public ICommand RenameBinCommand { get; }
 
+        // 履歴ファイルの内容を UI コレクションへ反映する。
         private void LoadHistory()
         {
             var items = _historyService.LoadHistory();
@@ -117,23 +119,25 @@ namespace Tenko.Native.ViewModels
             foreach (var item in items) History.Add(item);
         }
 
+        // 現在ロケーションの bin ファイル有無を確認し、警告表示状態を更新する。
         private void CheckBinFile()
         {
             ShowBinWarning = _scanFileService.Exists(CurrentLocation);
         }
 
+        // 手入力バーコードを検証し、要件を満たす場合のみスキャン処理を実行する。
         private void SubmitManualInput()
         {
             if (string.IsNullOrWhiteSpace(ManualInput)) return;
             
-            // Manual input must be numeric
+            // 数字以外は受け付けない。
             if (!ManualInput.All(char.IsDigit))
             {
                 _notificationService.Error("数字のみ入力可能です。");
                 return;
             }
 
-            // Valid length 5 or 10
+            // 仕様上、5桁または10桁のみ許可する。
             if (ManualInput.Length != 5 && ManualInput.Length != 10)
             {
                 _notificationService.Error("5桁または10桁の数字を入力してください。");
@@ -144,6 +148,7 @@ namespace Tenko.Native.ViewModels
             ManualInput = string.Empty;
         }
 
+        // スキャン情報を履歴と bin に追記する。
         private void ProcessScan(string barcode)
         {
             if (string.IsNullOrEmpty(CurrentLocation))
@@ -157,7 +162,8 @@ namespace Tenko.Native.ViewModels
                 ushort last5 = ushort.Parse(barcode.Length >= 5 ? barcode.Substring(barcode.Length - 5) : barcode);
                 var record = new ScanRecord
                 {
-                    Id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString() + last5.ToString("D5"),
+                    // 同一ミリ秒の衝突回避のため Guid 断片を付与する。
+                    Id = $"{DateTimeOffset.Now.ToUnixTimeMilliseconds()}_{last5:D5}_{Guid.NewGuid().ToString("N").Substring(0, 8)}",
                     Timestamp = DateTime.Now,
                     Barcode = barcode,
                     Last5 = last5,
@@ -174,6 +180,7 @@ namespace Tenko.Native.ViewModels
             }
         }
 
+        // 指定レコードを履歴と bin から削除する。
         private void DeleteRecord(ScanRecord? record)
         {
             if (record == null) return;
@@ -186,12 +193,20 @@ namespace Tenko.Native.ViewModels
 
             if (result != MessageBoxResult.Yes) return;
 
-            History.Remove(record);
-            _historyService.SaveHistory(History.ToList());
-            _scanFileService.RemoveLast5(record.Location, record.Last5);
-            _notificationService.Success("レコードを削除しました。");
+            try
+            {
+                History.Remove(record);
+                _historyService.SaveHistory(History.ToList());
+                _scanFileService.RemoveLast5(record.Location, record.Last5);
+                _notificationService.Success("レコードを削除しました。");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.Error($"レコード削除失敗: {ex.Message}");
+            }
         }
 
+        // 現在ロケーションの履歴と bin ファイルを削除する。
         private void DeleteAll()
         {
             var result = MessageBox.Show(
@@ -209,18 +224,22 @@ namespace Tenko.Native.ViewModels
             _notificationService.Success($"現在の「{CurrentLocation}」の履歴を削除しました。");
         }
 
+        // 現在ロケーションの既存 bin を別名へ退避し、履歴を初期化する。
         private void RenameBin(string? newName)
         {
             if (string.IsNullOrEmpty(newName)) return;
             
-            // Sanitize
-            string sanitized = new string(newName.Select(c => Path.GetInvalidFileNameChars().Contains(c) || char.IsControl(c) ? '_' : c).ToArray());
+            // ファイル名として不正な文字を置換する。
+            var invalidChars = Path.GetInvalidFileNameChars();
+            string sanitized = new string(newName
+                .Select(c => invalidChars.Contains(c) || char.IsControl(c) ? '_' : c)
+                .ToArray());
 
             try
             {
                 _scanFileService.RenameBin(CurrentLocation, sanitized);
                 
-                // Clear scan history to start fresh for the current location
+                // 退避後は現在ロケーションの新規計測として履歴をリセットする。
                 History.Clear();
                 _historyService.SaveHistory(new());
                 
@@ -233,6 +252,7 @@ namespace Tenko.Native.ViewModels
             }
         }
 
+        // 現在の履歴を CSV 形式で出力する。
         private void ExportCsv()
         {
             if (History.Count == 0) return;
@@ -255,6 +275,7 @@ namespace Tenko.Native.ViewModels
             }
         }
 
+        // 現在の履歴を Last5 の連続バイナリとして出力する。
         private void ExportBin()
         {
             if (History.Count == 0) return;
@@ -271,7 +292,9 @@ namespace Tenko.Native.ViewModels
             }
         }
 
-        private System.Timers.Timer? _notificationTimer;
+        private DispatcherTimer? _notificationTimer;
+
+        // 通知を短時間表示し、一定時間後に自動で非表示へ戻す。
         private void ShowNotification(string message, NotificationType type)
         {
             NotificationMessage = message;
@@ -279,11 +302,14 @@ namespace Tenko.Native.ViewModels
             IsNotificationVisible = true;
 
             _notificationTimer?.Stop();
-            _notificationTimer = new System.Timers.Timer(1200);
-            _notificationTimer.Elapsed += (s, e) =>
+            _notificationTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(1200)
+            };
+            _notificationTimer.Tick += (s, e) =>
             {
                 IsNotificationVisible = false;
-                _notificationTimer.Stop();
+                _notificationTimer?.Stop();
             };
             _notificationTimer.Start();
         }

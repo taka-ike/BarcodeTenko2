@@ -7,12 +7,14 @@ namespace Tenko.Native.Services
 {
     public class ScanFileService
     {
+        // ロケーションに対応する bin ファイルパスを組み立てる。
         private string GetFilePath(string location)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             return Path.Combine(baseDir, "scans", $"ids_{location}.bin");
         }
 
+        // 対象ロケーションの bin ファイルが存在し、かつ空でないかを返す。
         public bool Exists(string location)
         {
             if (string.IsNullOrEmpty(location)) return false;
@@ -20,6 +22,7 @@ namespace Tenko.Native.Services
             return File.Exists(path) && new FileInfo(path).Length > 0;
         }
 
+        // Last5 を 2byte 値として末尾へ追記する。
         public void AppendLast5(string location, ushort last5)
         {
             if (string.IsNullOrEmpty(location)) return;
@@ -31,6 +34,7 @@ namespace Tenko.Native.Services
             }
         }
 
+        // 指定した Last5 の最後の一致を 1 件だけ削除する。
         public void RemoveLast5(string location, ushort last5)
         {
             if (string.IsNullOrEmpty(location)) return;
@@ -40,9 +44,7 @@ namespace Tenko.Native.Services
             byte[] allBytes = File.ReadAllBytes(path);
             if (allBytes.Length % 2 != 0)
             {
-                // Handle abnormal binary length
-                // For now, we'll just log or ignore
-                return;
+                throw new InvalidDataException($"bin ファイルが壊れています: {path}");
             }
 
             List<ushort> values = new List<ushort>();
@@ -51,7 +53,7 @@ namespace Tenko.Native.Services
                 values.Add(BitConverter.ToUInt16(allBytes, i));
             }
 
-            // Find first occurrence from end (as per "last match")
+            // 最後に追加された同値を削除するため、末尾側から探索する。
             int index = values.LastIndexOf(last5);
             if (index >= 0)
             {
@@ -60,6 +62,7 @@ namespace Tenko.Native.Services
             }
         }
 
+        // 対象ロケーションの bin ファイルを削除する。
         public void DeleteBin(string location)
         {
             if (string.IsNullOrEmpty(location)) return;
@@ -70,6 +73,7 @@ namespace Tenko.Native.Services
             }
         }
 
+        // scans 配下の ids_*.bin をすべて削除する。
         public void DeleteAllBins()
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -83,6 +87,7 @@ namespace Tenko.Native.Services
             }
         }
 
+        // 現在ロケーションの bin を別名へ退避する。
         public void RenameBin(string oldLocation, string newFileName)
         {
             // Note: newFileName is expected to be just the suffix part.
